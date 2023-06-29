@@ -5,11 +5,14 @@ export enum EmptyFieldValue {
 
 }
 
-enum FieldType {
+enum FieldTypesEnum {
   Separator = "separator",
   TextInput = "text-input",
   Spacer = "spacer"
 }
+
+type FieldType = FieldTypesEnum | undefined
+
 class DcCrosswordField extends HTMLElement {
   _fieldType: FieldType | undefined
   _value: string | undefined
@@ -22,8 +25,6 @@ class DcCrosswordField extends HTMLElement {
 
   constructor() {
     super()
-    
-    this.fieldType =  undefined
     this.attachShadow({ mode: "open", delegatesFocus: true })
     this.styleTag = <HTMLStyleElement>document.createElement("style");
     this.styleTag.textContent = this._style()
@@ -63,11 +64,11 @@ class DcCrosswordField extends HTMLElement {
     }
   }
 
-  get fieldType(): string | undefined {
+  get fieldType(): FieldType | undefined {
     return this._fieldType
   }
   
-  set fieldType(val: FieldType | undefined) {
+  set fieldType(val: FieldType) {
     if (val === undefined) {
       this.removeAttribute("fieldType")
     } else {
@@ -84,8 +85,8 @@ class DcCrosswordField extends HTMLElement {
 
   connectedCallback(): void {
     this.isDevMode = this.getAttribute("is-dev-mode") !== null
-    this.fieldType = (this.getAttribute("field-type") as FieldType) ||  FieldType.TextInput
-    if (this.fieldType === FieldType.TextInput) {
+    this.fieldType = (this.getAttribute("field-type") as FieldType) ||  FieldTypesEnum.TextInput
+    if (this.fieldType === FieldTypesEnum.TextInput) {
       this._initTextInput()
     }
     this.updateStyles()
@@ -97,7 +98,7 @@ class DcCrosswordField extends HTMLElement {
       this._updateRendering(name, oldVal, newVal);
     }
   }
-
+  // @ts-ignore
   _updateRendering(attrName: string, oldVal: string, newVal: string) {
     switch(attrName) {
       case('value'): {
@@ -128,11 +129,11 @@ class DcCrosswordField extends HTMLElement {
   private updateStyles() {
     this.styleTag.textContent = this._style()
 
-    if (this.fieldType === FieldType.Separator) {
+    if (this.fieldType === FieldTypesEnum.Separator) {
       this.styleTag.textContent += this._getSeparatorStyles()
-    } else if (this.fieldType === FieldType.TextInput) {
+    } else if (this.fieldType === FieldTypesEnum.TextInput) {
       this.styleTag.textContent += this._getTextInputStyles()
-    } else if (this.fieldType === FieldType.Spacer) {
+    } else if (this.fieldType === FieldTypesEnum.Spacer) {
       this.styleTag.textContent += this._getSpacerStyles()
     }
   }
@@ -211,9 +212,9 @@ class DcCrosswordField extends HTMLElement {
   }
 
   toggleFieldType() {
-    if (this.fieldType === FieldType.TextInput) {
-      this.fieldType = FieldType.Separator
-      this.setAttribute("field-type", FieldType.Separator)
+    if (this.fieldType === FieldTypesEnum.TextInput) {
+      this.fieldType = FieldTypesEnum.Separator
+      this.setAttribute("field-type", FieldTypesEnum.Separator)
       this.value = EmptyFieldValue.Separator
       ;(this.inputElem as HTMLInputElement).value = this.value || ""
       for (const node of (this.shadowRoot?.childNodes as any)) {
@@ -221,13 +222,13 @@ class DcCrosswordField extends HTMLElement {
           this.shadowRoot?.removeChild(node)
         }
       }
-    }  else if (this.fieldType === FieldType.Separator) {
-      this.fieldType = FieldType.Spacer
-      this.setAttribute("field-type", FieldType.Spacer)
+    }  else if (this.fieldType === FieldTypesEnum.Separator) {
+      this.fieldType = FieldTypesEnum.Spacer
+      this.setAttribute("field-type", FieldTypesEnum.Spacer)
       this.value = EmptyFieldValue.Spacer
-    } else if (this.fieldType === FieldType.Spacer) {
-      this.fieldType = FieldType.TextInput
-      this.setAttribute("field-type", FieldType.TextInput)
+    } else if (this.fieldType === FieldTypesEnum.Spacer) {
+      this.fieldType = FieldTypesEnum.TextInput
+      this.setAttribute("field-type", FieldTypesEnum.TextInput)
       this.value = ""
       this._initTextInput()
     }
@@ -247,7 +248,7 @@ class DcCrosswordField extends HTMLElement {
 
     if (event.key === "Delete" || event.key === "Backspace") {
       if (event.ctrlKey) {
-        this.setAttribute("field-type", FieldType.Separator)
+        this.setAttribute("field-type", FieldTypesEnum.Separator)
       } else {
         this.value = (<any>undefined)
         ;(this.inputElem as HTMLInputElement).value = ""

@@ -5,11 +5,13 @@ export class Crossword {
   finalRowsNumber: number
   finalColumnsNumber: number
   fieldsArr: string[]
-
+  
   constructor(
     private parentElem: HTMLElement,
+    // @ts-ignore
     private rows: number,
     private columns: number,
+    // @ts-ignore
     private fields: string[],
     private isDevMode: boolean = false
   ) {
